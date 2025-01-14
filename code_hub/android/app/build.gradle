@@ -1,0 +1,44 @@
+plugins {
+    id "com.android.application"
+    // FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.code_hub"
+    compileSdk = flutter.compileSdkVersion // Ensure this matches the Firebase plugin requirements.
+
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8" // Explicit value for JVM target.
+    }
+
+    defaultConfig {
+        applicationId = "com.example.code_hub"
+        // Explicitly set minSdk to resolve the Firebase plugin compatibility issue.
+        minSdk = 23 // Set to at least 23, as required by `firebase_auth`.
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            // Use your release signing config here when ready.
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

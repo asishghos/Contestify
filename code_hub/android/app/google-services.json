@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "638145253536",
+    "project_id": "contestify-92b76",
+    "storage_bucket": "contestify-92b76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638145253536:android:b7a7606965fdab459ab9c5",
+        "android_client_info": {
+          "package_name": "com.example.code_hub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMrd4_0E-9lo9RH91dviuXH85BDAMSuZg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
