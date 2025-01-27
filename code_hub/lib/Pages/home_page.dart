@@ -19,6 +19,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
+  // Define custom colors
+  final Color primaryBlue = const Color(0xFF2196F3);
+  final Color lightBlue = const Color(0xFFE3F2FD);
+  final Color darkBlue = const Color(0xFF1565C0);
+
   int _selectedTimeFilter = 1;
   int _currentPage = 0;
   final PageController _pageController = PageController(initialPage: 0);
@@ -60,7 +65,8 @@ class _HomePageState extends State<HomePage>
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: _buildAppBar(),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -69,7 +75,9 @@ class _HomePageState extends State<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                SizedBox(
+                  height: 20,
+                ),
                 _buildCarousel(),
                 _buildCarouselIndicators(),
                 _buildTimeFilter(),
@@ -80,7 +88,6 @@ class _HomePageState extends State<HomePage>
           ),
         ),
       ),
-      //bottomNavigationBar: _buildNavBar(),
     );
   }
 
@@ -131,13 +138,14 @@ class _HomePageState extends State<HomePage>
         _buildCarouselItem<LeetcodeModel>(
           future: _dataFuture3,
           onData: (data) => _buildCardCarousel(
-            username: data.data.matchedUser.username,
-            rating: data.data.userContestRanking.rating.toString(),
-            rank: data.data.matchedUser.badges.toString(),
+            username: data.data!.matchedUser!.username ?? 'Unknown',
+            rating: data.data?.userContestRanking?.rating?.toString() ?? 'N/A',
+            rank: data.data?.userContestRanking?.globalRanking.toString() ??
+                'N/A',
             platform: "Leetcode",
-            image: data.data.matchedUser.profile.userAvatar,
+            image: data.data?.matchedUser?.profile?.userAvatar ??
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaUqSojztqZnRXSFvvlm_sX78WOWk7w4ZNxQ&s",
           ),
-          
         ),
         _buildCarouselItem<void>(
           future: _dataFuture1,
@@ -172,7 +180,47 @@ class _HomePageState extends State<HomePage>
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Oops! Something went wrong',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Error: ${snapshot.error}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Please enter your username in the Profile Settings',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Text(
+                        'Or click here to enter your username',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
             } else if (snapshot.hasData) {
               return onData(snapshot.data!);
             } else {
@@ -195,15 +243,15 @@ class _HomePageState extends State<HomePage>
       width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          colors: [lightBlue, Colors.white],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: primaryBlue.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -213,13 +261,12 @@ class _HomePageState extends State<HomePage>
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Avatar with glowing effect
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: primaryBlue.withOpacity(0.3),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -230,7 +277,7 @@ class _HomePageState extends State<HomePage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.blue,
+                  color: primaryBlue,
                   width: 3,
                 ),
               ),
@@ -241,24 +288,15 @@ class _HomePageState extends State<HomePage>
             ),
           ),
           const SizedBox(height: 15),
-
-          // Username with gradient
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [Color(0xFF60A5FA), Color(0xFFA78BFA)],
-            ).createShader(bounds),
-            child: Text(
-              username,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+          Text(
+            username,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: darkBlue,
             ),
           ),
           const SizedBox(height: 10),
-
-          // Stats with custom containers
           _buildStatRow(
             icon: Icons.star_rounded,
             label: 'Rating',
@@ -293,7 +331,7 @@ class _HomePageState extends State<HomePage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -306,16 +344,16 @@ class _HomePageState extends State<HomePage>
           const SizedBox(width: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: Colors.black87,
               fontSize: 14,
             ),
           ),
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: darkBlue,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -338,7 +376,7 @@ class _HomePageState extends State<HomePage>
             width: _currentPage == index ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: _currentPage == index ? Colors.blue : Colors.grey,
+              color: _currentPage == index ? primaryBlue : Colors.grey[300],
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -347,77 +385,71 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
+  AppBar _buildAppBar() {
+    return AppBar(
+      elevation: 2,
+      backgroundColor: Colors.white,
+      shadowColor: primaryBlue.withOpacity(0.1),
+      toolbarHeight: 80, // Increased height to accommodate the layout
+      automaticallyImplyLeading: false, // Disable back button
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Hello,',
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              color: Colors.grey[600],
+            ),
+          ),
+          Text(
+            FirebaseAuth.instance.currentUser!.displayName ?? 'User',
+            style: GoogleFonts.poppins(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: darkBlue,
+              letterSpacing: 1.2,
+            ),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hello,',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.grey[400],
-                ),
-              ),
-              Text(
-                FirebaseAuth.instance.currentUser!.displayName ?? 'User',
-                style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
-          Container(
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: Container(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: primaryBlue,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: primaryBlue.withOpacity(0.2),
                   blurRadius: 6,
-                  offset: Offset(0, 3),
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
-            height: height * 0.05,
-            width: width * 0.15,
-            child: Center(
-              child: IconButton(
-                onPressed: () async {
-                  try {
-                    await FirebaseAuth.instance.signOut();
-                    // Optionally navigate to the login screen or show a logout confirmation
-                    print("User logged out successfully.");
-                  } catch (e) {
-                    print("Error during logout: $e");
-                  }
-                },
-                icon: Icon(
-                  Icons.account_circle,
-                  color: Colors.white,
-                ),
-                tooltip: "Logout",
+            margin: const EdgeInsets.symmetric(vertical: 15),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.notifications,
+                color: Colors.white,
               ),
             ),
           ),
-        ],
+        ),
+      ],
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: primaryBlue.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -449,17 +481,17 @@ class _HomePageState extends State<HomePage>
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-                  colors: [Colors.blue[700]!, Colors.blue[300]!],
+                  colors: [primaryBlue, darkBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: isSelected ? null : Colors.grey[900],
+          color: isSelected ? null : Colors.grey[100],
           borderRadius: BorderRadius.circular(16),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: primaryBlue.withOpacity(0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -470,7 +502,7 @@ class _HomePageState extends State<HomePage>
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            color: isSelected ? Colors.white : Colors.grey[400],
+            color: isSelected ? Colors.white : Colors.grey[600],
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -662,6 +694,11 @@ class _HomePageState extends State<HomePage>
     required String link,
     required int platformId,
   }) {
+    // Custom colors
+    final Color primaryBlue = const Color(0xFF2196F3);
+    final Color lightBlue = const Color(0xFFE3F2FD);
+    final Color darkBlue = const Color(0xFF1565C0);
+
     // Convert ISO time string to formatted time
     String formatDateTime(String isoString) {
       final date = DateTime.parse(isoString);
@@ -672,17 +709,17 @@ class _HomePageState extends State<HomePage>
     Color getPlatformColor(int id) {
       switch (id) {
         case 1:
-          return Colors.blue; // Codeforces
+          return primaryBlue; // Codeforces
         case 2:
           return Colors.brown; // CodeChef
         case 93:
-          return Colors.blue[800]!; // AtCoder
+          return darkBlue; // AtCoder
         case 126:
           return Colors.green; // GeeksforGeeks
         case 136:
           return Colors.orange; // Naukri
         default:
-          return Colors.grey[400]!;
+          return Colors.grey[600]!;
       }
     }
 
@@ -711,13 +748,13 @@ class _HomePageState extends State<HomePage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: lightBlue,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -777,13 +814,13 @@ class _HomePageState extends State<HomePage>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: platformColor.withOpacity(0.2),
+                        color: lightBlue,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Upcoming',
                         style: TextStyle(
-                          color: platformColor,
+                          color: darkBlue,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -795,7 +832,7 @@ class _HomePageState extends State<HomePage>
                 Text(
                   event,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -804,23 +841,23 @@ class _HomePageState extends State<HomePage>
                 Row(
                   children: [
                     Icon(Icons.calendar_today,
-                        size: 14, color: Colors.grey[400]),
+                        size: 14, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
                       formattedStartTime,
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Colors.grey[600],
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Icon(Icons.timer_outlined,
-                        size: 14, color: Colors.grey[400]),
+                        size: 14, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
                       '$time min',
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Colors.grey[600],
                         fontSize: 12,
                       ),
                     ),
@@ -831,43 +868,6 @@ class _HomePageState extends State<HomePage>
           ),
         ),
       ),
-    );
-  }
-
-  Container _buildNavBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey[600],
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-        items: [
-          _buildNavItem(Icons.home_rounded, 'Home'),
-          _buildNavItem(Icons.calendar_today_rounded, 'Calendar'),
-          _buildNavItem(Icons.note_rounded, 'Notes'),
-          _buildNavItem(Icons.bookmark_rounded, 'Bookmarks'),
-          _buildNavItem(Icons.person_rounded, 'Profile'),
-        ],
-      ),
-    );
-  }
-
-  BottomNavigationBarItem _buildNavItem(IconData icon, String label) {
-    return BottomNavigationBarItem(
-      icon: Icon(icon),
-      label: label,
     );
   }
 }

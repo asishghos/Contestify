@@ -1,4 +1,4 @@
-import 'package:code_hub/Pages/home_page.dart';
+import 'package:code_hub/mainPage.dart';
 import 'package:code_hub/Pages/landing_page.dart';
 import 'package:code_hub/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasData) {
-            return HomePage();
+            return MainPage();
           }
           return WelcomePage();
         },

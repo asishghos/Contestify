@@ -99,7 +99,6 @@ class CodeforcesModel {
   }
 }
 
-
 class CodechefModel {
   String username;
   String rating;
@@ -162,92 +161,99 @@ class CodechefModel {
 }
 
 class LeetcodeModel {
-  Data data;
+  Data? data;  // Make nullable
 
-  LeetcodeModel({required this.data});
+  LeetcodeModel({this.data}); // Make optional
 
-  factory LeetcodeModel.fromJson(Map<String, dynamic> json) {
+  factory LeetcodeModel.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return LeetcodeModel();
     return LeetcodeModel(
-      data: Data.fromJson(json['data']),
+      data: json['data'] == null ? null : Data.fromJson(json['data']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'data': data.toJson(),
+      'data': data?.toJson(),
     };
   }
 }
 
 class Data {
-  MatchedUser matchedUser;
-  UserContestRanking userContestRanking;
+  MatchedUser? matchedUser;  // Make nullable
+  UserContestRanking? userContestRanking;
 
-  Data({required this.matchedUser, required this.userContestRanking});
+  Data({
+    this.matchedUser,
+    this.userContestRanking,
+  });
 
-  factory Data.fromJson(Map<String, dynamic> json) {
+  factory Data.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return Data();
     return Data(
-      matchedUser: MatchedUser.fromJson(json['matchedUser']),
-      userContestRanking: UserContestRanking.fromJson(json['userContestRanking']),
+      matchedUser: json['matchedUser'] == null ? null : MatchedUser.fromJson(json['matchedUser']),
+      userContestRanking: json['userContestRanking'] == null ? null : UserContestRanking.fromJson(json['userContestRanking']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'matchedUser': matchedUser.toJson(),
-      'userContestRanking': userContestRanking.toJson(),
+      'matchedUser': matchedUser?.toJson(),
+      'userContestRanking': userContestRanking?.toJson(),
     };
   }
 }
 
 class MatchedUser {
-  String username;
-  Profile profile;
-  List<LanguageProblemCount> languageProblemCount;
-  SubmitStats submitStats;
-  List<dynamic> badges;
-  UserCalendar userCalendar;
+  String? username;
+  Profile? profile;
+  List<LanguageProblemCount>? languageProblemCount;
+  SubmitStats? submitStats;
+  List<dynamic>? badges;
+  UserCalendar? userCalendar;
 
   MatchedUser({
-    required this.username,
-    required this.profile,
-    required this.languageProblemCount,
-    required this.submitStats,
-    required this.badges,
-    required this.userCalendar,
+    this.username,
+    this.profile,
+    this.languageProblemCount,
+    this.badges,
+    this.submitStats,
+    this.userCalendar,
   });
 
-  factory MatchedUser.fromJson(Map<String, dynamic> json) {
+  factory MatchedUser.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return MatchedUser();
     return MatchedUser(
       username: json['username'],
-      profile: Profile.fromJson(json['profile']),
-      languageProblemCount: (json['languageProblemCount'] as List)
-          .map((e) => LanguageProblemCount.fromJson(e))
+      profile: json['profile'] == null ? null : Profile.fromJson(json['profile']),
+      languageProblemCount: (json['languageProblemCount'] as List?)
+          ?.map((e) => LanguageProblemCount.fromJson(e))
           .toList(),
-      submitStats: SubmitStats.fromJson(json['submitStats']),
-      badges: json['badges'] ?? [],
-      userCalendar: UserCalendar.fromJson(json['userCalendar']),
+      submitStats: json['submitStats'] == null ? null : SubmitStats.fromJson(json['submitStats']),
+      badges: json['badges'] as List?,
+      userCalendar: json['userCalendar'] == null ? null : UserCalendar.fromJson(json['userCalendar']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'username': username,
-      'profile': profile.toJson(),
-      'languageProblemCount': languageProblemCount.map((e) => e.toJson()).toList(),
-      'submitStats': submitStats.toJson(),
+      'profile': profile?.toJson(),
+      'languageProblemCount': languageProblemCount?.map((e) => e.toJson()).toList(),
+      'submitStats': submitStats?.toJson(),
       'badges': badges,
-      'userCalendar': userCalendar.toJson(),
+      'userCalendar': userCalendar?.toJson(),
     };
   }
 }
 
 class Profile {
-  String userAvatar;
+  String? userAvatar;
 
-  Profile({required this.userAvatar});
+  Profile({this.userAvatar});
 
-  factory Profile.fromJson(Map<String, dynamic> json) {
+  factory Profile.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return Profile();
     return Profile(
       userAvatar: json['userAvatar'],
     );
@@ -261,12 +267,13 @@ class Profile {
 }
 
 class LanguageProblemCount {
-  String languageName;
-  int problemsSolved;
+  String? languageName;
+  int? problemsSolved;
 
-  LanguageProblemCount({required this.languageName, required this.problemsSolved});
+  LanguageProblemCount({this.languageName, this.problemsSolved});
 
-  factory LanguageProblemCount.fromJson(Map<String, dynamic> json) {
+  factory LanguageProblemCount.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return LanguageProblemCount();
     return LanguageProblemCount(
       languageName: json['languageName'],
       problemsSolved: json['problemsSolved'],
@@ -282,33 +289,39 @@ class LanguageProblemCount {
 }
 
 class SubmitStats {
-  List<AcSubmissionNum> acSubmissionNum;
+  List<AcSubmissionNum>? acSubmissionNum;
 
-  SubmitStats({required this.acSubmissionNum});
+  SubmitStats({this.acSubmissionNum});
 
-  factory SubmitStats.fromJson(Map<String, dynamic> json) {
+  factory SubmitStats.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return SubmitStats();
     return SubmitStats(
-      acSubmissionNum: (json['acSubmissionNum'] as List)
-          .map((e) => AcSubmissionNum.fromJson(e))
+      acSubmissionNum: (json['acSubmissionNum'] as List?)
+          ?.map((e) => AcSubmissionNum.fromJson(e))
           .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'acSubmissionNum': acSubmissionNum.map((e) => e.toJson()).toList(),
+      'acSubmissionNum': acSubmissionNum?.map((e) => e.toJson()).toList(),
     };
   }
 }
 
 class AcSubmissionNum {
-  String difficulty;
-  int count;
-  int submissions;
+  String? difficulty;
+  int? count;
+  int? submissions;
 
-  AcSubmissionNum({required this.difficulty, required this.count, required this.submissions});
+  AcSubmissionNum({
+    this.difficulty,
+    this.count,
+    this.submissions,
+  });
 
-  factory AcSubmissionNum.fromJson(Map<String, dynamic> json) {
+  factory AcSubmissionNum.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return AcSubmissionNum();
     return AcSubmissionNum(
       difficulty: json['difficulty'],
       count: json['count'],
@@ -326,12 +339,13 @@ class AcSubmissionNum {
 }
 
 class UserCalendar {
-  int streak;
-  int totalActiveDays;
+  int? streak;
+  int? totalActiveDays;
 
-  UserCalendar({required this.streak, required this.totalActiveDays});
+  UserCalendar({this.streak, this.totalActiveDays});
 
-  factory UserCalendar.fromJson(Map<String, dynamic> json) {
+  factory UserCalendar.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return UserCalendar();
     return UserCalendar(
       streak: json['streak'],
       totalActiveDays: json['totalActiveDays'],
@@ -347,26 +361,27 @@ class UserCalendar {
 }
 
 class UserContestRanking {
-  int attendedContestsCount;
-  int globalRanking;
-  double rating;
-  double topPercentage;
-  int totalParticipants;
+  int? attendedContestsCount;
+  int? globalRanking;
+  double? rating;
+  double? topPercentage;
+  int? totalParticipants;
 
   UserContestRanking({
-    required this.attendedContestsCount,
-    required this.globalRanking,
-    required this.rating,
-    required this.topPercentage,
-    required this.totalParticipants,
+    this.attendedContestsCount,
+    this.globalRanking,
+    this.rating,
+    this.topPercentage,
+    this.totalParticipants,
   });
 
-  factory UserContestRanking.fromJson(Map<String, dynamic> json) {
+  factory UserContestRanking.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return UserContestRanking();
     return UserContestRanking(
       attendedContestsCount: json['attendedContestsCount'],
       globalRanking: json['globalRanking'],
-      rating: json['rating'],
-      topPercentage: json['topPercentage'],
+      rating: (json['rating'] as num?)?.toDouble(),
+      topPercentage: (json['topPercentage'] as num?)?.toDouble(),
       totalParticipants: json['totalParticipants'],
     );
   }
@@ -381,4 +396,3 @@ class UserContestRanking {
     };
   }
 }
-

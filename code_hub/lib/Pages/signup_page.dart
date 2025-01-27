@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:code_hub/Pages/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,23 @@ class _SignupPageState extends State<SignupPage> {
         duration: Duration(seconds: 2),
       );
       print(e.message);
+    }
+  }
+
+  Future<void> uploadUsername() async {
+    try {
+      final data = await FirebaseFirestore.instance
+          .collection("username")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set({
+        // 'uid': FirebaseAuth.instance.currentUser!.uid,
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text.trim(),
+      });
+      //print(data);
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -266,6 +284,7 @@ class _SignupPageState extends State<SignupPage> {
                 ElevatedButton(
                   onPressed: () async {
                     await createUserWithEmailAndPassword();
+                    await uploadUsername();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade700,

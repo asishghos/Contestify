@@ -43,7 +43,7 @@ class _DummyPageState extends State<DummyPage> {
               itemBuilder: (context, index) {
                 final result = data.objects![index];
                 return ListTile(
-                  title: Text(result.event ?? 'No event name'),
+                  title: Text(result.event ?? 'No event'),
                   subtitle: Text('Start: ${result.start ?? 'No date'}'),
                 );
               },
