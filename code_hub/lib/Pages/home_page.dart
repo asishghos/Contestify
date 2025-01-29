@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,10 +20,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  // Define custom colors
-  final Color primaryBlue = const Color(0xFF2196F3);
-  final Color lightBlue = const Color(0xFFE3F2FD);
-  final Color darkBlue = const Color(0xFF1565C0);
+  // Define custom colors for dark theme
+  final Color primaryColor = const Color(0xFF1E88E5); // Slightly muted blue
+  final Color backgroundColor = const Color(0xFF121212); // Dark background
+  final Color surfaceColor = const Color(0xFF1E1E1E); // Slightly lighter dark
+  final Color accentColor = const Color(0xFF64B5F6); // Light blue accent
+  final Color textPrimaryColor = const Color(0xFFE0E0E0); // Light grey text
+  final Color textSecondaryColor = const Color(0xFF9E9E9E); // Medium grey text
+  final Color cardColor = const Color(0xFF252525); // Dark card background
 
   int _selectedTimeFilter = 1;
   int _currentPage = 0;
@@ -66,7 +71,7 @@ class _HomePageState extends State<HomePage>
     height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: _buildAppBar(),
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -246,12 +251,12 @@ class _HomePageState extends State<HomePage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [lightBlue, Colors.white],
+          colors: [surfaceColor, cardColor],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryBlue.withOpacity(0.1),
+            color: Colors.black26,
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -266,7 +271,7 @@ class _HomePageState extends State<HomePage>
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: primaryBlue.withOpacity(0.3),
+                  color: accentColor.withOpacity(0.3),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -277,7 +282,7 @@ class _HomePageState extends State<HomePage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: primaryBlue,
+                  color: accentColor,
                   width: 3,
                 ),
               ),
@@ -293,7 +298,7 @@ class _HomePageState extends State<HomePage>
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: darkBlue,
+              color: textPrimaryColor,
             ),
           ),
           const SizedBox(height: 10),
@@ -331,7 +336,7 @@ class _HomePageState extends State<HomePage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: surfaceColor.withOpacity(0.7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -345,7 +350,7 @@ class _HomePageState extends State<HomePage>
           Text(
             label,
             style: TextStyle(
-              color: Colors.black87,
+              color: textSecondaryColor,
               fontSize: 14,
             ),
           ),
@@ -353,7 +358,7 @@ class _HomePageState extends State<HomePage>
           Text(
             value,
             style: TextStyle(
-              color: darkBlue,
+              color: textPrimaryColor,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -376,8 +381,24 @@ class _HomePageState extends State<HomePage>
             width: _currentPage == index ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: _currentPage == index ? primaryBlue : Colors.grey[300],
+              gradient: _currentPage == index
+                  ? LinearGradient(
+                      colors: [primaryColor, accentColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
+              color: _currentPage == index ? null : surfaceColor,
               borderRadius: BorderRadius.circular(4),
+              boxShadow: _currentPage == index
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
           ),
         ),
@@ -388,10 +409,10 @@ class _HomePageState extends State<HomePage>
   AppBar _buildAppBar() {
     return AppBar(
       elevation: 2,
-      backgroundColor: Colors.white,
-      shadowColor: primaryBlue.withOpacity(0.1),
-      toolbarHeight: 80, // Increased height to accommodate the layout
-      automaticallyImplyLeading: false, // Disable back button
+      backgroundColor: surfaceColor,
+      shadowColor: Colors.black26,
+      toolbarHeight: 80,
+      automaticallyImplyLeading: false,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -399,7 +420,7 @@ class _HomePageState extends State<HomePage>
             'Hello,',
             style: GoogleFonts.poppins(
               fontSize: 15,
-              color: Colors.grey[600],
+              color: textSecondaryColor,
             ),
           ),
           Text(
@@ -407,7 +428,7 @@ class _HomePageState extends State<HomePage>
             style: GoogleFonts.poppins(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: darkBlue,
+              color: textPrimaryColor,
               letterSpacing: 1.2,
             ),
           ),
@@ -418,11 +439,11 @@ class _HomePageState extends State<HomePage>
           padding: const EdgeInsets.only(right: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: primaryBlue,
+              color: primaryColor,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: primaryBlue.withOpacity(0.2),
+                  color: Colors.black26,
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
@@ -430,27 +451,17 @@ class _HomePageState extends State<HomePage>
             ),
             margin: const EdgeInsets.symmetric(vertical: 15),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                openAppSettings();
+              },
               icon: const Icon(
-                Icons.notifications,
+                Icons.settings,
                 color: Colors.white,
               ),
             ),
           ),
         ),
       ],
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: primaryBlue.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -481,17 +492,17 @@ class _HomePageState extends State<HomePage>
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-                  colors: [primaryBlue, darkBlue],
+                  colors: [primaryColor, accentColor],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: isSelected ? null : Colors.grey[100],
+          color: isSelected ? null : surfaceColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: primaryBlue.withOpacity(0.3),
+                    color: primaryColor.withOpacity(0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -502,7 +513,7 @@ class _HomePageState extends State<HomePage>
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            color: isSelected ? Colors.white : Colors.grey[600],
+            color: isSelected ? Colors.white : textSecondaryColor,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -694,32 +705,21 @@ class _HomePageState extends State<HomePage>
     required String link,
     required int platformId,
   }) {
-    // Custom colors
-    final Color primaryBlue = const Color(0xFF2196F3);
-    final Color lightBlue = const Color(0xFFE3F2FD);
-    final Color darkBlue = const Color(0xFF1565C0);
-
-    // Convert ISO time string to formatted time
-    String formatDateTime(String isoString) {
-      final date = DateTime.parse(isoString);
-      return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
-    }
-
     // Platform-specific styling
     Color getPlatformColor(int id) {
       switch (id) {
         case 1:
-          return primaryBlue; // Codeforces
+          return const Color(0xFF42A5F5); // Codeforces - lighter blue
         case 2:
-          return Colors.brown; // CodeChef
+          return const Color(0xFFBCAAA4); // CodeChef - lighter brown
         case 93:
-          return darkBlue; // AtCoder
+          return const Color(0xFF64B5F6); // AtCoder - light blue
         case 126:
-          return Colors.green; // GeeksforGeeks
+          return const Color(0xFF81C784); // GeeksforGeeks - lighter green
         case 136:
-          return Colors.orange; // Naukri
+          return const Color(0xFFFFB74D); // Naukri - lighter orange
         default:
-          return Colors.grey[600]!;
+          return Colors.grey[400]!;
       }
     }
 
@@ -740,6 +740,11 @@ class _HomePageState extends State<HomePage>
       }
     }
 
+    String formatDateTime(String isoString) {
+      final date = DateTime.parse(isoString);
+      return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+    }
+
     var time = double.parse(duration) / 60;
     final platformColor = getPlatformColor(platformId);
     final formattedStartTime = formatDateTime(startTime);
@@ -748,11 +753,11 @@ class _HomePageState extends State<HomePage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: lightBlue,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black12,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -814,13 +819,13 @@ class _HomePageState extends State<HomePage>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: lightBlue,
+                        color: surfaceColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Upcoming',
                         style: TextStyle(
-                          color: darkBlue,
+                          color: accentColor,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -831,8 +836,8 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   event,
-                  style: const TextStyle(
-                    color: Colors.black87,
+                  style: TextStyle(
+                    color: textPrimaryColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -841,23 +846,23 @@ class _HomePageState extends State<HomePage>
                 Row(
                   children: [
                     Icon(Icons.calendar_today,
-                        size: 14, color: Colors.grey[600]),
+                        size: 14, color: textSecondaryColor),
                     const SizedBox(width: 4),
                     Text(
                       formattedStartTime,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: textSecondaryColor,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Icon(Icons.timer_outlined,
-                        size: 14, color: Colors.grey[600]),
+                        size: 14, color: textSecondaryColor),
                     const SizedBox(width: 4),
                     Text(
                       '$time min',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: textSecondaryColor,
                         fontSize: 12,
                       ),
                     ),

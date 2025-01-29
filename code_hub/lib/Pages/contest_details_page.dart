@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class ContestDetailsPage extends StatelessWidget {
+class ContestDetailsPage extends StatefulWidget {
   final String event;
   final String platformName;
   final String iconUrl;
@@ -26,20 +26,36 @@ class ContestDetailsPage extends StatelessWidget {
     required this.platformId,
   }) : super(key: key);
 
+  @override
+  State<ContestDetailsPage> createState() => _ContestDetailsPageState();
+}
+
+class _ContestDetailsPageState extends State<ContestDetailsPage> {
+  // Custom colors for dark theme
+  final Color backgroundColor = const Color(0xFF121212);
+
+  final Color surfaceColor = const Color(0xFF1E1E1E);
+
+  final Color cardColor = const Color(0xFF252525);
+
+  final Color textPrimaryColor = const Color(0xFFE0E0E0);
+
+  final Color textSecondaryColor = const Color(0xFF9E9E9E);
+
   Color getPlatformColor(int id) {
     switch (id) {
       case 1:
-        return Colors.blue; // Codeforces
+        return const Color(0xFF1E88E5); // Codeforces - using our primary blue
       case 2:
-        return Colors.brown; // CodeChef
+        return const Color(0xFF8D6E63); // CodeChef - warmer brown
       case 93:
-        return Colors.blue[800]!; // AtCoder
+        return const Color(0xFF1565C0); // AtCoder - darker blue
       case 126:
-        return Colors.green; // GeeksforGeeks
+        return const Color(0xFF66BB6A); // GeeksforGeeks - softer green
       case 136:
-        return Colors.orange; // Naukri
+        return const Color(0xFFFF9800); // Naukri - warmer orange
       default:
-        return Colors.grey[400]!;
+        return const Color(0xFF9E9E9E); // Default - neutral grey
     }
   }
 
@@ -56,7 +72,7 @@ class ContestDetailsPage extends StatelessWidget {
       case 136:
         return 'Naukri';
       default:
-        return platformName;
+        return widget.platformName;
     }
   }
 
@@ -65,192 +81,232 @@ class ContestDetailsPage extends StatelessWidget {
     return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}";
   }
 
-  Future<void> _addToCalendar() async {
-    final Event event = Event(
-      title: this.event,
-      description: 'Coding contest on ${getPlatformName(platformId)}',
-      location: link,
-      startDate: DateTime.parse(startTime),
-      endDate: DateTime.parse(endTime),
-    );
-    await Add2Calendar.addEvent2Cal(event);
+  Future<void> _requestCalendarPermissions() async {
+    final status = await Permission.calendar.request();
+    if (status.isGranted) {
+      print('Calendar permission granted');
+    } else if (status.isDenied) {
+      print('Calendar permission denied');
+    } else if (status.isPermanentlyDenied) {
+      print(
+          'Calendar permission permanently denied. Open settings to grant permission.');
+      await openAppSettings();
+    }
   }
 
-  // Future<void> _setReminder(BuildContext context) async {
-  //   final FlutterLocalNotificationsPlugin notifications =
-  //       FlutterLocalNotificationsPlugin();
+  Future<void> _addToCalendar() async {
+    await _requestCalendarPermissions();
+    try {
+      final Event event = Event(
+        title: this.widget.event,
+        description: 'Coding contest on ${getPlatformName(widget.platformId)}',
+        location: widget.link,
+        startDate: DateTime.parse(widget.startTime),
+        endDate: DateTime.parse(widget.endTime),
+      );
+      await Add2Calendar.addEvent2Cal(event);
+      Get.snackbar('Success', 'Event successfully added to calendar.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1));
+      print('Event successfully added to calendar.');
+    } catch (e) {
+      print('Error adding event to calendar: $e');
+    }
+  }
 
-  //   final startDate = DateTime.parse(startTime);
-  //   final reminderTime = startDate.subtract(const Duration(minutes: 30));
+  var height;
 
-  //   final AndroidNotificationDetails androidDetails =
-  //       AndroidNotificationDetails(
-  //     'contest_reminders',
-  //     'Contest Reminders',
-  //     channelDescription: 'Notifications for coding contests',
-  //     importance: Importance.high,
-  //     priority: Priority.high,
-  //     color: getPlatformColor(platformId),
-  //   );
-
-  //   final NotificationDetails details =
-  //       NotificationDetails(android: androidDetails);
-
-  //   await notifications.schedule(
-  //     platformId, // Use platformId as notification id
-  //     'Contest Reminder: $event',
-  //     'Contest starts in 30 minutes on ${getPlatformName(platformId)}',
-  //     reminderTime,
-  //     details,
-  //   );
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Reminder set for $event'),
-  //       backgroundColor: getPlatformColor(platformId),
-  //     ),
-  //   );
-  // }
+  var width;
 
   @override
   Widget build(BuildContext context) {
-    final platformColor = getPlatformColor(platformId);
-    final time = double.parse(duration) / 60;
-
-    return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: AppBar(
-        backgroundColor: platformColor.withOpacity(0.1),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: platformColor),
-          onPressed: () => Get.back(),
+    final platformColor = getPlatformColor(widget.platformId);
+    final time = double.parse(widget.duration) / 60;
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: backgroundColor,
+        cardColor: cardColor,
+        colorScheme: ColorScheme.dark(
+          surface: surfaceColor,
+          background: backgroundColor,
+          primary: platformColor,
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: platformColor.withOpacity(0.1),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: surfaceColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: platformColor),
+            onPressed: () => Get.back(),
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Section with gradient
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      surfaceColor,
+                      backgroundColor,
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  // Platform Icon and Name
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      "https://clist.by" + iconUrl,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.code,
-                          color: platformColor,
-                          size: 40,
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    getPlatformName(platformId),
-                    style: TextStyle(
-                      color: platformColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Contest Details
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Time Details
-                  _buildDetailRow(
-                    Icons.calendar_today,
-                    'Start Time',
-                    formatDateTime(startTime),
-                    platformColor,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDetailRow(
-                    Icons.calendar_today,
-                    'End Time',
-                    formatDateTime(endTime),
-                    platformColor,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDetailRow(
-                    Icons.timer_outlined,
-                    'Duration',
-                    '$time minutes',
-                    platformColor,
-                  ),
-                  const SizedBox(height: 32),
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildActionButton(
-                          'Add Reminder',
-                          Icons.notifications_active,
-                          platformColor,
-                          () {
-                            //  _setReminder(context)
+                child: Column(
+                  children: [
+                    // Platform Icon with glow effect
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: platformColor.withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          "https://clist.by" + widget.iconUrl,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: platformColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                Icons.code,
+                                color: platformColor,
+                                size: 40,
+                              ),
+                            );
                           },
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildActionButton(
-                          'Add to Calendar',
-                          Icons.calendar_month,
-                          platformColor,
-                          _addToCalendar,
-                        ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      getPlatformName(widget.platformId),
+                      style: TextStyle(
+                        color: platformColor,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildActionButton(
-                    'Register Now',
-                    Icons.login,
-                    platformColor,
-                    () async {
-                      final url = Uri.parse(link);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      }
-                    },
-                    fullWidth: true,
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              // Contest Details
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.event,
+                      style: TextStyle(
+                        color: textPrimaryColor,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    // Time Details with enhanced styling
+                    _buildDetailRow(
+                      Icons.calendar_today,
+                      'Start Time',
+                      formatDateTime(widget.startTime),
+                      platformColor,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildDetailRow(
+                      Icons.calendar_today,
+                      'End Time',
+                      formatDateTime(widget.endTime),
+                      platformColor,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildDetailRow(
+                      Icons.timer_outlined,
+                      'Duration',
+                      '${time.toStringAsFixed(0)} minutes',
+                      platformColor,
+                    ),
+                    const SizedBox(height: 40),
+                    // Action Buttons with gradient
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActionButton(
+                            'Add Reminder',
+                            Icons.notifications_active,
+                            platformColor,
+                            () {},
+                            //wdth: width * 0.1,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildActionButton(
+                            'Add to Calendar',
+                            Icons.calendar_month,
+                            platformColor,
+                            () async {
+                              await _addToCalendar();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 50),
+                    _buildActionButton(
+                      'Register Now',
+                      Icons.login,
+                      platformColor,
+                      () async {
+                        final url = Uri.parse(widget.link);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          Get.snackbar('Error', 'Could not launch the URL.',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 1));
+                        }
+                      },
+                      fullWidth: true,
+                      isPrimary: true,
+                      //wdth: width * 0.8,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -262,39 +318,50 @@ class ContestDetailsPage extends StatelessWidget {
     String value,
     Color color,
   ) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
           ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: textSecondaryColor,
+                  fontSize: 14,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: textPrimaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -304,32 +371,56 @@ class ContestDetailsPage extends StatelessWidget {
     Color color,
     VoidCallback onTap, {
     bool fullWidth = false,
+    bool isPrimary = false,
   }) {
-    return SizedBox(
+    return Container(
       width: fullWidth ? double.infinity : null,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: isPrimary
+            ? LinearGradient(
+                colors: [
+                  color,
+                  color.withOpacity(0.8),
+                ],
+              )
+            : null,
+        boxShadow: isPrimary
+            ? [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color.withOpacity(0.1),
-          foregroundColor: color,
+          backgroundColor: isPrimary ? Colors.transparent : cardColor,
+          foregroundColor: isPrimary ? textPrimaryColor : color,
           padding: const EdgeInsets.symmetric(
             horizontal: 20,
-            vertical: 16,
+            vertical: 20,
           ),
+          elevation: isPrimary ? 0 : 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: color.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(16),
+            side: isPrimary
+                ? BorderSide.none
+                : BorderSide(color: color.withOpacity(0.2)),
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
+            Icon(icon, size: 20, color: isPrimary ? textPrimaryColor : color),
+            const SizedBox(width: 10),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),

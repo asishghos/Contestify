@@ -20,7 +20,15 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
     'LeetCode': TextEditingController(),
   };
 
-  // Track initial values for comparison
+  // Custom colors
+  final Color primaryColor = const Color(0xFF1E88E5);
+  final Color backgroundColor = const Color(0xFF121212);
+  final Color surfaceColor = const Color(0xFF1E1E1E);
+  final Color accentColor = const Color(0xFF64B5F6);
+  final Color textPrimaryColor = const Color(0xFFE0E0E0);
+  final Color textSecondaryColor = const Color(0xFF9E9E9E);
+  final Color cardColor = const Color(0xFF252525);
+
   Map<String, String> initialValues = {};
   bool isLoading = true;
 
@@ -71,16 +79,13 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
         'uid': FirebaseAuth.instance.currentUser!.uid,
       };
 
-      // Only include fields that have changed
       controllers.forEach((key, controller) {
         if (controller.text.trim() != initialValues[key]) {
           updateData[key] = controller.text.trim();
         }
       });
 
-      // If there are changes, update Firestore
       if (updateData.length > 1) {
-        // > 1 because 'uid' is always included
         await FirebaseFirestore.instance
             .collection("username")
             .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -90,7 +95,8 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
           'Success',
           'Profiles updated successfully',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
+          backgroundColor: primaryColor.withOpacity(0.2),
+          colorText: textPrimaryColor,
           duration: const Duration(seconds: 2),
         );
       }
@@ -102,7 +108,8 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
         'Error',
         'Failed to update profiles',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: textPrimaryColor,
         duration: const Duration(seconds: 2),
       );
     }
@@ -110,122 +117,178 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Coding Profiles'),
-        elevation: 0,
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: backgroundColor,
+        cardColor: cardColor,
+        primaryColor: primaryColor,
+        colorScheme: ColorScheme.dark(
+          primary: primaryColor,
+          secondary: accentColor,
+          surface: surfaceColor,
+          background: backgroundColor,
+        ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.code,
-                                size: 48,
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Edit Your Coding Profiles',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Update your competitive programming usernames',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Coding Profiles',
+              style: TextStyle(color: textPrimaryColor)),
+          backgroundColor: surfaceColor,
+          elevation: 0,
+          iconTheme: IconThemeData(color: textPrimaryColor),
+        ),
+        body: isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: primaryColor,
+                ),
+              )
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ...controllers.entries
-                          .map(
-                            (entry) => Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: TextFormField(
-                                controller: entry.value,
-                                decoration: InputDecoration(
-                                  labelText: entry.key,
-                                  hintText: 'Enter your ${entry.key} username',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  prefixIcon: const Icon(Icons.person_outline),
-                                  suffixIcon: entry.value.text.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () {
-                                            setState(() {
-                                              entry.value.clear();
-                                            });
-                                          },
-                                        )
-                                      : null,
-                                ),
-                                validator: (value) {
-                                  if (value != null &&
-                                      value.isNotEmpty &&
-                                      value.length < 3) {
-                                    return 'Username must be at least 3 characters long';
-                                  }
-                                  return null;
-                                },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  surfaceColor,
+                                  cardColor,
+                                ],
                               ),
                             ),
-                          )
-                          .toList(),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            // Show a loading indicator or do something before saving
-                            await uploadUsername();
-                            Get.snackbar(
-                              "Success",
-                              "Username saved successfully.",
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.green,
-                              colorText: Colors.white,
-                              duration: Duration(seconds: 2),
-                            );
-                            Get.to(HomePage());
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.code,
+                                  size: 56,
+                                  color: accentColor,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Edit Your Coding Profiles',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: textPrimaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Update your competitive programming usernames',
+                                  style: TextStyle(
+                                    color: textSecondaryColor,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Save Changes',
-                          style: TextStyle(fontSize: 18),
+                        const SizedBox(height: 24),
+                        ...controllers.entries
+                            .map(
+                              (entry) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: TextFormField(
+                                  controller: entry.value,
+                                  style: TextStyle(color: textPrimaryColor),
+                                  decoration: InputDecoration(
+                                    labelText: entry.key,
+                                    labelStyle:
+                                        TextStyle(color: textSecondaryColor),
+                                    hintText:
+                                        'Enter your ${entry.key} username',
+                                    hintStyle: TextStyle(
+                                        color: textSecondaryColor
+                                            .withOpacity(0.7)),
+                                    filled: true,
+                                    fillColor: surfaceColor,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide:
+                                          BorderSide(color: primaryColor),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: primaryColor.withOpacity(0.5)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide:
+                                          BorderSide(color: accentColor),
+                                    ),
+                                    prefixIcon: Icon(Icons.person_outline,
+                                        color: primaryColor),
+                                    suffixIcon: entry.value.text.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(Icons.clear,
+                                                color: textSecondaryColor),
+                                            onPressed: () {
+                                              setState(() {
+                                                entry.value.clear();
+                                              });
+                                            },
+                                          )
+                                        : null,
+                                  ),
+                                  validator: (value) {
+                                    if (value != null &&
+                                        value.isNotEmpty &&
+                                        value.length < 3) {
+                                      return 'Username must be at least 3 characters long';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              await uploadUsername();
+                              Get.to(HomePage());
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            //onPrimary: textPrimaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 4,
+                          ),
+                          child: const Text(
+                            'Save Changes',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }

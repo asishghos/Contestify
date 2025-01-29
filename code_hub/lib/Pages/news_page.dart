@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+// Define theme colors
+class ThemeColors {
+  static const Color primary = Color(0xFF1E88E5); // Slightly muted blue
+  static const Color background = Color(0xFF121212); // Dark background
+  static const Color surface = Color(0xFF1E1E1E); // Slightly lighter dark
+  static const Color accent = Color(0xFF64B5F6); // Light blue accent
+  static const Color textPrimary = Color(0xFFE0E0E0); // Light grey text
+  static const Color textSecondary = Color(0xFF9E9E9E); // Medium grey text
+  static const Color card = Color(0xFF252525); // Dark card background
+}
+
 class NewsItem {
   final String title;
   final String subtitle;
@@ -43,24 +54,24 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: ThemeColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: ThemeColors.surface,
         title: Row(
           children: [
             Text(
               'Browse new, ',
               style: TextStyle(
-                color: Colors.grey[800],
+                color: ThemeColors.textSecondary,
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const Text(
+            Text(
               'OPPORTUNITIES',
               style: TextStyle(
-                color: Colors.blue,
+                color: ThemeColors.accent,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -78,7 +89,7 @@ class _NewsPageState extends State<NewsPage> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.7,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
+                color: ThemeColors.surface.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -90,7 +101,7 @@ class _NewsPageState extends State<NewsPage> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.75,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.7),
+                color: ThemeColors.surface.withOpacity(0.7),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -114,6 +125,7 @@ class _NewsPageState extends State<NewsPage> {
       margin: const EdgeInsets.fromLTRB(0, 10, 0, 30),
       child: Card(
         elevation: 8,
+        color: ThemeColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -130,7 +142,7 @@ class _NewsPageState extends State<NewsPage> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      ThemeColors.background.withOpacity(0.9),
                     ],
                     stops: const [0.5, 1.0],
                   ).createShader(rect);
@@ -154,7 +166,8 @@ class _NewsPageState extends State<NewsPage> {
                         _buildActionButton(
                           icon:
                               _isSaved ? Icons.favorite : Icons.favorite_border,
-                          color: _isSaved ? Colors.red : Colors.white,
+                          color:
+                              _isSaved ? Colors.red : ThemeColors.textPrimary,
                           onTap: () {
                             setState(() {
                               _isSaved = !_isSaved;
@@ -186,7 +199,7 @@ class _NewsPageState extends State<NewsPage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.8),
+                          ThemeColors.background.withOpacity(0.95),
                         ],
                       ),
                     ),
@@ -195,8 +208,8 @@ class _NewsPageState extends State<NewsPage> {
                       children: [
                         Text(
                           newsItem.title,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: ThemeColors.textPrimary,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -204,8 +217,8 @@ class _NewsPageState extends State<NewsPage> {
                         const SizedBox(height: 12),
                         Text(
                           newsItem.subtitle,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: ThemeColors.textSecondary,
                             fontSize: 16,
                           ),
                         ),
@@ -216,13 +229,13 @@ class _NewsPageState extends State<NewsPage> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.3),
+                            color: ThemeColors.primary.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             newsItem.expectedSalary,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: ThemeColors.textPrimary,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -254,7 +267,7 @@ class _NewsPageState extends State<NewsPage> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.black.withOpacity(0.2),
+            color: ThemeColors.surface.withOpacity(0.3),
           ),
           child: Icon(
             icon,

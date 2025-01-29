@@ -16,6 +16,16 @@ class _LoginPageState extends State<LoginPage> {
   final _emailControllerForPasswordReset = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  // Custom colors for dark theme
+  final Color primaryColor = const Color(0xFF1E88E5);
+  final Color backgroundColor = const Color(0xFF121212);
+  final Color surfaceColor = const Color(0xFF1E1E1E);
+  final Color accentColor = const Color(0xFF64B5F6);
+  final Color textPrimaryColor = const Color(0xFFE0E0E0);
+  final Color textSecondaryColor = const Color(0xFF9E9E9E);
+  final Color cardColor = const Color(0xFF252525);
+
   Future<void> loginUserWithEmailAndPassword() async {
     try {
       final UserCredential = await FirebaseAuth.instance
@@ -27,37 +37,34 @@ class _LoginPageState extends State<LoginPage> {
         'Account Login successfully!',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: Duration(seconds: 2),
+        colorText: textPrimaryColor,
+        duration: Duration(seconds: 1),
       );
       await Future.delayed(Duration(seconds: 2));
       Get.offAll(() => HomePage());
-
-      print(UserCredential);
     } on FirebaseAuthException catch (e) {
       Get.snackbar(
         'Error',
         e.message!,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: Duration(seconds: 2),
+        colorText: textPrimaryColor,
+        duration: Duration(seconds: 1),
       );
-      print(e.message);
     }
   }
 
   Future<void> resetPasswordEmail() async {
     try {
-      final resetPassword = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .sendPasswordResetEmail(email: _emailController.text.trim());
       Get.snackbar(
         'Success',
-        'Email send successfully!',
+        'Email sent successfully!',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: Duration(seconds: 2),
+        colorText: textPrimaryColor,
+        duration: Duration(seconds: 1),
       );
     } on FirebaseAuthException catch (e) {
       Get.snackbar(
@@ -65,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
         e.message!,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
+        colorText: textPrimaryColor,
         duration: Duration(seconds: 2),
       );
     }
@@ -74,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -84,19 +91,23 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-                // Logo or Image
+                // Logo or Image with gradient background
                 Hero(
                   tag: 'logo',
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.blue.shade50,
+                      gradient: LinearGradient(
+                        colors: [primaryColor, accentColor],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
                     child: Icon(
                       Icons.person,
                       size: 80,
-                      color: Colors.blue.shade400,
+                      color: textPrimaryColor,
                     ),
                   ),
                 ),
@@ -107,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: primaryColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -116,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                   'Sign in to continue',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey.shade700,
+                    color: textSecondaryColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -127,99 +138,35 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     children: [
                       // Email Field
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'Enter your email',
-                          prefixIcon: Icon(Icons.email_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      // Password Field
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          hintText: 'Enter your password',
-                          prefixIcon: Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
-                          ),
+                          ],
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Get.defaultDialog(
-                        backgroundColor: Colors.white,
-                        title: 'Forgot Password',
-                        content: TextFormField(
-                          controller: _emailControllerForPasswordReset,
+                        child: TextFormField(
+                          controller: _emailController,
+                          style: TextStyle(color: textPrimaryColor),
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             labelText: 'Email',
+                            labelStyle: TextStyle(color: textSecondaryColor),
                             hintText: 'Enter your email',
-                            prefixIcon: Icon(Icons.email_outlined),
+                            hintStyle: TextStyle(color: textSecondaryColor),
+                            prefixIcon:
+                                Icon(Icons.email_outlined, color: accentColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: Colors.blue, width: 2),
-                            ),
+                            filled: true,
+                            fillColor: cardColor,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -231,40 +178,156 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Password Field
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: _passwordController,
+                          style: TextStyle(color: textPrimaryColor),
+                          obscureText: !_isPasswordVisible,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            labelStyle: TextStyle(color: textSecondaryColor),
+                            hintText: 'Enter your password',
+                            hintStyle: TextStyle(color: textSecondaryColor),
+                            prefixIcon:
+                                Icon(Icons.lock_outline, color: accentColor),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: accentColor,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: cardColor,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Get.defaultDialog(
+                        backgroundColor: cardColor,
+                        title: 'Forgot Password',
+                        titleStyle: TextStyle(color: textPrimaryColor),
+                        content: Container(
+                          decoration: BoxDecoration(
+                            color: surfaceColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: TextFormField(
+                            controller: _emailControllerForPasswordReset,
+                            style: TextStyle(color: textPrimaryColor),
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              labelStyle: TextStyle(color: textSecondaryColor),
+                              hintText: 'Enter your email',
+                              hintStyle: TextStyle(color: textSecondaryColor),
+                              prefixIcon: Icon(Icons.email_outlined,
+                                  color: accentColor),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: surfaceColor,
+                            ),
+                          ),
+                        ),
                         onCancel: () {},
                         onConfirm: () async {
                           await resetPasswordEmail();
                         },
+                        buttonColor: primaryColor,
+                        cancelTextColor: textSecondaryColor,
+                        confirmTextColor: textPrimaryColor,
                       );
                     },
                     child: Text(
                       'Forgot Password?',
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: accentColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Login Button
-                ElevatedButton(
-                  onPressed: () async {
-                    await loginUserWithEmailAndPassword();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                // Login Button with gradient
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [primaryColor, accentColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await loginUserWithEmailAndPassword();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textPrimaryColor,
+                      ),
                     ),
                   ),
                 ),
@@ -275,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: TextStyle(color: Colors.grey.shade700),
+                      style: TextStyle(color: textSecondaryColor),
                     ),
                     TextButton(
                       onPressed: () {
@@ -284,7 +347,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Sign Up',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: accentColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

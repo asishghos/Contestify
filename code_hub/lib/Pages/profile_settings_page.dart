@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
   const ProfileSettingsPage({Key? key}) : super(key: key);
@@ -14,12 +16,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final Map<String, bool> isEditing = {};
   final Map<String, TextEditingController> controllers = {};
   final Map<String, String> userData = {
-    'username': '',
+    'name': '',
     'email': '',
-    'codeforcesHandle': '',
-    'codechefHandle': '',
-    'atcoderHandle': '',
-    'leetcodeHandle': '',
+    'Codeforces': '',
+    'CodeChef': '',
+    'AtCoder': '',
+    'LeetCode': '',
     'collegeName': '',
     'major': '',
     'graduationYear': '',
@@ -27,6 +29,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     'githubHandle': '',
     'linkedinProfile': '',
     'preferredLanguage': '',
+    'imageURL': '',
   };
 
   bool notificationsEnabled = true;
@@ -52,7 +55,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   Future<void> fetchExistingData() async {
     try {
       final snapshot = await FirebaseFirestore.instance
-          .collection('username') // Changed from 'username' to 'username'
+          .collection('username')
           .doc(FirebaseAuth.instance.currentUser?.uid)
           .get();
 
@@ -90,30 +93,77 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     }
   }
 
+  Future<void> resetPasswordEmail() async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: userData['email'] ?? '');
+      Get.snackbar(
+        'Success',
+        'Email sent successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: textPrimaryColor,
+        duration: Duration(seconds: 1),
+      );
+    } on FirebaseAuthException catch (e) {
+      Get.snackbar(
+        'Error to reset password',
+        e.message!,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: textPrimaryColor,
+        duration: Duration(seconds: 2),
+      );
+    }
+  }
+
+  File _selectedImage = File('');
+  Future<void> _pickImage() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedImage = File(result.files.single.path!);
+        });
+        updateField('imageURL', result.files.single.path!);
+      } else {
+        print('No image selected');
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+
   @override
-  // Define custom colors
-  final Color primaryBlue = const Color(0xFF2196F3);
-  final Color lightBlue = const Color(0xFFE3F2FD);
-  final Color darkBlue = const Color(0xFF1565C0);
-  final Color textGrey = const Color(0xFF757575);
+// Define custom colors for dark theme
+  final Color primaryColor = const Color(0xFF1E88E5); // Slightly muted blue
+  final Color backgroundColor = const Color(0xFF121212); // Dark background
+  final Color surfaceColor = const Color(0xFF1E1E1E); // Slightly lighter dark
+  final Color accentColor = const Color(0xFF64B5F6); // Light blue accent
+  final Color textPrimaryColor = const Color(0xFFE0E0E0); // Light grey text
+  final Color textSecondaryColor = const Color(0xFF9E9E9E); // Medium grey text
+  final Color cardColor = const Color(0xFF252525); // Dark card background
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: surfaceColor,
         title: Text(
           'Profile Settings',
           style: TextStyle(
-            color: Colors.black87,
+            color: textPrimaryColor,
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: darkBlue),
+            icon: Icon(Icons.logout, color: accentColor),
             onPressed: () => _showLogoutDialog(context),
           ),
         ],
@@ -129,14 +179,27 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: lightBlue,
+                      color: cardColor,
                       width: 4,
                     ),
                   ),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor: lightBlue,
-                    child: Icon(Icons.person, size: 50, color: primaryBlue),
+                    backgroundColor: surfaceColor,
+                    child: _selectedImage != null
+                        ? ClipOval(
+                            child: Image.file(
+                              File(userData['imageURL']!),
+                              fit: BoxFit.cover,
+                              width: 100,
+                              height: 100,
+                            ),
+                          )
+                        : Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
                   ),
                 ),
                 Positioned(
@@ -145,16 +208,16 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: backgroundColor, width: 2),
                     ),
                     child: CircleAvatar(
-                      backgroundColor: primaryBlue,
+                      backgroundColor: primaryColor,
                       radius: 18,
                       child: IconButton(
                         icon: const Icon(Icons.camera_alt, size: 18),
-                        color: Colors.white,
+                        color: textPrimaryColor,
                         onPressed: () {
-                          // Add image picker functionality
+                          _pickImage();
                         },
                       ),
                     ),
@@ -167,17 +230,17 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
           // Personal Information Section
           _buildSectionHeader('Personal Information'),
-          _buildHandleTile('username', 'Username', Icons.person_outline),
+          _buildHandleTile('name', 'name', Icons.person_outline),
           _buildHandleTile('email', 'Email', Icons.email_outlined),
 
           const SizedBox(height: 16),
 
           // Competitive Programming Section
           _buildSectionHeader('Competitive Programming Profiles'),
-          _buildHandleTile('codeforcesHandle', 'Codeforces', Icons.code),
-          _buildHandleTile('codechefHandle', 'CodeChef', Icons.code),
-          _buildHandleTile('atcoderHandle', 'AtCoder', Icons.code),
-          _buildHandleTile('leetcodeHandle', 'LeetCode', Icons.code),
+          _buildHandleTile('Codeforces', 'Codeforces Handle', Icons.code),
+          _buildHandleTile('CodeChef', 'CodeChef Handle', Icons.code),
+          _buildHandleTile('AtCoder', 'AtCoder Handle', Icons.code),
+          _buildHandleTile('LeetCode', 'LeetCode Handle', Icons.code),
 
           const SizedBox(height: 16),
 
@@ -196,7 +259,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           _buildSectionHeader('Settings'),
           Card(
             elevation: 0,
-            color: lightBlue,
+            color: cardColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -205,26 +268,28 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 SwitchListTile(
                   title: Text('Enable Notifications',
                       style: TextStyle(
-                          color: Colors.black87, fontWeight: FontWeight.w500)),
+                          color: textPrimaryColor,
+                          fontWeight: FontWeight.w500)),
                   subtitle: Text('Receive push notifications',
-                      style: TextStyle(color: textGrey)),
+                      style: TextStyle(color: textSecondaryColor)),
                   value: notificationsEnabled,
-                  activeColor: primaryBlue,
+                  activeColor: primaryColor,
                   onChanged: (bool value) {
                     setState(() {
                       notificationsEnabled = value;
                     });
                   },
                 ),
-                Divider(height: 1, color: Colors.blue.withOpacity(0.1)),
+                Divider(height: 1, color: surfaceColor),
                 SwitchListTile(
                   title: Text('Dark Mode',
                       style: TextStyle(
-                          color: Colors.black87, fontWeight: FontWeight.w500)),
+                          color: textPrimaryColor,
+                          fontWeight: FontWeight.w500)),
                   subtitle: Text('Enable dark theme',
-                      style: TextStyle(color: textGrey)),
+                      style: TextStyle(color: textSecondaryColor)),
                   value: darkModeEnabled,
-                  activeColor: primaryBlue,
+                  activeColor: primaryColor,
                   onChanged: (bool value) {
                     setState(() {
                       darkModeEnabled = value;
@@ -240,15 +305,26 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           // Change Password Button
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryBlue,
-              foregroundColor: Colors.white,
+              backgroundColor: primaryColor,
+              foregroundColor: textPrimaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
             onPressed: () {
-              // Add change password functionality
+              Get.defaultDialog(
+                backgroundColor: cardColor,
+                buttonColor: primaryColor,
+                cancelTextColor: textSecondaryColor,
+                confirmTextColor: textPrimaryColor,
+                title: 'Are you sure you want to reset your password?',
+                titleStyle: TextStyle(color: textPrimaryColor),
+                onCancel: () {},
+                onConfirm: () async {
+                  await resetPasswordEmail();
+                },
+              );
             },
             child: const Text(
               'Change Password',
@@ -268,7 +344,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         title,
         style: TextStyle(
           fontSize: 18,
-          color: darkBlue,
+          color: accentColor,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -278,33 +354,34 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   Widget _buildHandleTile(String field, String displayName, IconData icon) {
     return Card(
       elevation: 0,
-      color: lightBlue,
+      color: cardColor,
       margin: const EdgeInsets.symmetric(vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: Icon(icon, color: primaryBlue),
+        leading: Icon(icon, color: primaryColor),
         title: Text(
           displayName,
           style: TextStyle(
-            color: Colors.black87,
+            color: textPrimaryColor,
             fontWeight: FontWeight.w500,
           ),
         ),
         subtitle: isEditing[field] == true
             ? TextField(
                 controller: controllers[field],
+                style: TextStyle(color: textPrimaryColor),
                 decoration: InputDecoration(
                   hintText: 'Enter your $displayName',
-                  hintStyle: TextStyle(color: textGrey),
+                  hintStyle: TextStyle(color: textSecondaryColor),
                   border: InputBorder.none,
                 ),
                 onSubmitted: (value) => updateField(field, value),
               )
             : Text(
                 userData[field] ?? '',
-                style: TextStyle(color: textGrey),
+                style: TextStyle(color: textSecondaryColor),
               ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -326,7 +403,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               ),
             ] else
               IconButton(
-                icon: Icon(Icons.edit, color: primaryBlue),
+                icon: Icon(Icons.edit, color: accentColor),
                 onPressed: () {
                   setState(() {
                     isEditing[field] = true;
@@ -344,20 +421,20 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: surfaceColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          title: Text('Logout', style: TextStyle(color: Colors.blue)),
+          title: Text('Logout', style: TextStyle(color: accentColor)),
           content: Text('Are you sure you want to logout?',
-              style: TextStyle(color: Colors.black, fontSize: 20)),
+              style: TextStyle(color: textPrimaryColor, fontSize: 20)),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: textGrey,
+                  color: textSecondaryColor,
                   fontSize: 20,
                 ),
               ),
@@ -374,7 +451,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               },
               child: Text('Logout',
                   style: TextStyle(
-                      color: Colors.red,
+                      color: Colors.redAccent,
                       fontSize: 20,
                       fontWeight: FontWeight.w600)),
             ),
