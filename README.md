@@ -16,3 +16,6 @@ To install and set up the project locally, follow these steps:
 1. Clone the repository:
    ```sh
    git clone https://github.com/asishghos/Contestify.git
+2. Hosting Link:
+   ```sh
+   https://contest-lake.vercel.app/
