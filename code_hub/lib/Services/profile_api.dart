@@ -14,6 +14,8 @@ class ProfileApi {
     try {
       String? uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
+        print("Fetching data for user with UID: $uid");
+
         DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
             await FirebaseFirestore.instance
                 .collection('username')
@@ -21,6 +23,7 @@ class ProfileApi {
                 .get();
 
         if (documentSnapshot.exists) {
+          print('Document exists for UID: $uid');
           Map<String, dynamic>? data = documentSnapshot.data();
 
           if (data != null) {
@@ -28,16 +31,26 @@ class ProfileApi {
             codeforces = data['Codeforces'] ?? '';
             codechef = data['CodeChef'] ?? '';
             leetcode = data['LeetCode'] ?? '';
-          } else {}
-        } else {}
-      } else {}
+
+            print(
+                'Data fetched: AtCoder: $atcoder, Codeforces: $codeforces, CodeChef: $codechef, LeetCode: $leetcode');
+          } else {
+            print('No data found in the document.');
+          }
+        } else {
+          print('No document found for the user with UID: $uid');
+        }
+      } else {
+        print('User is not logged in.');
+      }
     } catch (e) {
-      rethrow;
+      print('Error fetching user data: $e');
+      throw e; // Propagate the error for proper error handling
     }
   }
 
   Future<CodeforcesModel> fetchDataCodeforces() async {
-    await fetchUserData();
+    await fetchUserData(); // Ensure we have the latest username
     if (codeforces.isEmpty) {
       throw Exception('Codeforces username not found');
     }
@@ -56,7 +69,7 @@ class ProfileApi {
   }
 
   Future<CodechefModel> fetchDataCodechef() async {
-    await fetchUserData();
+    await fetchUserData(); // Ensure we have the latest username
     if (codechef.isEmpty) {
       throw Exception('CodeChef username not found');
     }
@@ -75,7 +88,7 @@ class ProfileApi {
   }
 
   Future<LeetcodeModel> fetchDataLeetcode() async {
-    await fetchUserData();
+    await fetchUserData(); // Ensure we have the latest username
     if (leetcode.isEmpty) {
       throw Exception('LeetCode username not found');
     }
