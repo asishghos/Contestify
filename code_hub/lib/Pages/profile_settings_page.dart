@@ -38,7 +38,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize controllers for all fields
     userData.keys.forEach((field) {
       controllers[field] = TextEditingController();
     });
@@ -47,7 +46,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
   @override
   void dispose() {
-    // Dispose all controllers
     controllers.values.forEach((controller) => controller.dispose());
     super.dispose();
   }
@@ -86,7 +84,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       });
     } catch (e) {
       debugPrint('Error updating $field: $e');
-      // Show error to user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update $field')),
       );
@@ -188,8 +185,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     backgroundColor: surfaceColor,
                     child: _selectedImage != null
                         ? ClipOval(
-                            child: Image.file(
-                              File(userData['imageURL']!),
+                            child: Image.network(
+                              "https://i.pinimg.com/736x/09/5c/42/095c42d703e07b2e120f32b1d47f9a1d.jpg",
                               fit: BoxFit.cover,
                               width: 100,
                               height: 100,

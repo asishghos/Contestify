@@ -144,7 +144,7 @@ class WelcomePage extends StatelessWidget {
 
               // Sign Up Button with outline
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
+                padding: EdgeInsets.fromLTRB(32, 0, 32, 20),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
