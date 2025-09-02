@@ -195,7 +195,6 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 40),
 
-                // Signup Form
                 Form(
                   key: _formKey,
                   child: Column(
@@ -228,7 +227,7 @@ class _SignupPageState extends State<SignupPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       _buildInputField(
                         controller: _passwordController,
                         label: 'Password',
