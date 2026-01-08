@@ -1,0 +1,16 @@
+# Ignore files that shouldn't be deployed to Vercel
+code_hub/android/
+code_hub/ios/
+code_hub/linux/
+code_hub/macos/
+code_hub/windows/
+code_hub/test/
+*.iml
+.idea/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+*.lock
+*.log
+
