@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> loginUserWithEmailAndPassword() async {
     try {
-      final UserCredential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .signInWithEmailAndPassword(
               email: _emailController.text.trim(),
               password: _passwordController.text.trim());
@@ -56,8 +56,24 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> resetPasswordEmail() async {
     try {
-      await FirebaseAuth.instance
-          .sendPasswordResetEmail(email: _emailController.text.trim());
+      // Use the email from the password reset dialog, fallback to login email
+      final email = _emailControllerForPasswordReset.text.trim().isNotEmpty
+          ? _emailControllerForPasswordReset.text.trim()
+          : _emailController.text.trim();
+      
+      if (email.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Please enter an email address',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: textPrimaryColor,
+          duration: Duration(seconds: 2),
+        );
+        return;
+      }
+      
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       Get.snackbar(
         'Success',
         'Email sent successfully!',
@@ -365,6 +381,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     _emailController.dispose();
+    _emailControllerForPasswordReset.dispose();
     _passwordController.dispose();
     super.dispose();
   }

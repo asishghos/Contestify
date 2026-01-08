@@ -3,6 +3,7 @@ import 'package:code_hub/Pages/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:developer' as Developer;
 
 class SignupPage extends StatefulWidget {
   @override
@@ -71,10 +72,10 @@ class _SignupPageState extends State<SignupPage> {
           .set({
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
-        'password': _passwordController.text.trim(),
+        // SECURITY: Never store passwords in Firestore - they are handled by Firebase Auth
       });
     } catch (e) {
-      print(e);
+      Developer.log(e.toString());
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:io';
+import 'dart:developer' as Developer;
 import 'package:file_picker/file_picker.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
@@ -52,9 +53,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
   Future<void> fetchExistingData() async {
     try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        Developer.log('User is not logged in');
+        return;
+      }
+      
       final snapshot = await FirebaseFirestore.instance
           .collection('username')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .doc(uid)
           .get();
 
       if (snapshot.exists) {
@@ -67,15 +74,23 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         });
       }
     } catch (e) {
-      debugPrint('Error fetching data: $e');
+      Developer.log('Error fetching data: $e');
     }
   }
 
   Future<void> updateField(String field, String value) async {
     try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User is not logged in')),
+        );
+        return;
+      }
+      
       await FirebaseFirestore.instance
           .collection('username')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .doc(uid)
           .set({field: value}, SetOptions(merge: true));
 
       setState(() {
@@ -83,7 +98,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         isEditing[field] = false;
       });
     } catch (e) {
-      debugPrint('Error updating $field: $e');
+      Developer.log('Error updating $field: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update $field')),
       );
@@ -127,15 +142,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         });
         updateField('imageURL', result.files.single.path!);
       } else {
-        print('No image selected');
+        Developer.log('No image selected');
       }
     } catch (e) {
-      print('Error picking image: $e');
+      Developer.log('Error picking image: $e');
     }
   }
 
-  @override
-// Define custom colors for dark theme
+  // Define custom colors for dark theme
   final Color primaryColor = const Color(0xFF1E88E5); // Slightly muted blue
   final Color backgroundColor = const Color(0xFF121212); // Dark background
   final Color surfaceColor = const Color(0xFF1E1E1E); // Slightly lighter dark
@@ -183,10 +197,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: surfaceColor,
-                    child: _selectedImage != null
+                    child: _selectedImage.path.isNotEmpty
                         ? ClipOval(
-                            child: Image.network(
-                              "https://i.pinimg.com/736x/09/5c/42/095c42d703e07b2e120f32b1d47f9a1d.jpg",
+                            child: Image.file(
+                              _selectedImage,
                               fit: BoxFit.cover,
                               width: 100,
                               height: 100,
@@ -440,9 +454,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               onPressed: () async {
                 try {
                   await FirebaseAuth.instance.signOut();
-                  print("User logged out successfully.");
+                  Developer.log("User logged out successfully.");
                 } catch (e) {
-                  print("Error during logout: $e");
+                  Developer.log("Error during logout: $e");
                 }
                 Get.back();
               },

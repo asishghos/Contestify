@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:developer' as Developer;
 
 class ContestDetailsPage extends StatefulWidget {
   final String event;
@@ -84,11 +85,11 @@ class _ContestDetailsPageState extends State<ContestDetailsPage> {
   Future<void> _requestCalendarPermissions() async {
     final status = await Permission.calendar.request();
     if (status.isGranted) {
-      print('Calendar permission granted');
+      Developer.log('Calendar permission granted');
     } else if (status.isDenied) {
-      print('Calendar permission denied');
+      Developer.log('Calendar permission denied');
     } else if (status.isPermanentlyDenied) {
-      print(
+      Developer.log(
           'Calendar permission permanently denied. Open settings to grant permission.');
       await openAppSettings();
     }
@@ -109,9 +110,9 @@ class _ContestDetailsPageState extends State<ContestDetailsPage> {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           duration: Duration(seconds: 1));
-      print('Event successfully added to calendar.');
+      Developer.log('Event successfully added to calendar.');
     } catch (e) {
-      print('Error adding event to calendar: $e');
+      Developer.log('Error adding event to calendar: $e');
     }
   }
 

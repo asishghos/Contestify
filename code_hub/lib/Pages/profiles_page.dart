@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'dart:developer' as Developer;
 
 class CodingProfilesPage extends StatefulWidget {
   const CodingProfilesPage({Key? key}) : super(key: key);
@@ -66,7 +67,7 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
         });
       }
     } catch (e) {
-      print('Error fetching data: $e');
+      Developer.log('Error fetching data: $e');
       setState(() {
         isLoading = false;
       });
@@ -103,7 +104,7 @@ class _CodingProfilesPageState extends State<CodingProfilesPage> {
 
       Get.back();
     } catch (e) {
-      print(e);
+      Developer.log(e.toString());
       Get.snackbar(
         'Error',
         'Failed to update profiles',

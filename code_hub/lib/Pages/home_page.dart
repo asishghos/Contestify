@@ -42,10 +42,11 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    final profileApi = ProfileApi();
     _dataFuture = ClistApi().fetchData();
-    _dataFuture1 = ProfileApi().fetchDataCodeforces();
-    _dataFuture2 = ProfileApi().fetchDataCodechef();
-    _dataFuture3 = ProfileApi().fetchDataLeetcode();
+    _dataFuture1 = profileApi.fetchDataCodeforces();
+    _dataFuture2 = profileApi.fetchDataCodechef();
+    _dataFuture3 = profileApi.fetchDataLeetcode();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -748,7 +749,6 @@ class _HomePageState extends State<HomePage>
     var time = double.parse(duration) / 60;
     final platformColor = getPlatformColor(platformId);
     final formattedStartTime = formatDateTime(startTime);
-    final formattedEndTime = formatDateTime(endTime);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
